@@ -51,7 +51,7 @@
 					if (repo.fork || ! repo.description || repo.description.indexOf('WIP') >= 0) return;
 					if (excludes.indexOf(repo.name) >= 0) return;
 
-					var url = repo.homepage || (repo.has_pages ? `http://${repo.owner.login}.github.io/${repo.name}/` : repo.html_url);
+					var url = repo.homepage || (repo.has_pages ? `//${repo.owner.login}.github.io/${repo.name}/` : repo.html_url);
 					main.innerHTML += `
 <article>
 	<h1>
