@@ -1,0 +1,2 @@
+body{font-family:sans-serif;padding:10px}main{-webkit-column-count:3;-webkit-column-gap:10px}@media (max-width:1080px){main{-webkit-column-count:2}}@media (max-width:640px){main{-webkit-column-count:1}}article{background-color:#eee;-webkit-column-break-inside:avoid;padding:10px;margin-bottom:10px;& h1{margin-top:0}}a{color:#333;text-decoration:none}
+/*# sourceMappingURL=bundle.css.map*/

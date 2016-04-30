@@ -1,0 +1,40 @@
+{
+  "name": "mismith.github.io",
+  "version": "1.0.0",
+  "description": "Directory for my public repos",
+  "main": "webpack.config.js",
+  "scripts": {
+    "prestart": "webpack",
+    "start": "webpack-dev-server",
+    "predeploy": "webpack -p",
+    "deploy": "git subtree push --prefix dist origin master"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mismith/mismith.github.io.git"
+  },
+  "author": "Murray Smith <murray@mismith.info> (http://mismith.info)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mismith/mismith.github.io/issues"
+  },
+  "homepage": "https://github.com/mismith/mismith.github.io#readme",
+  "devDependencies": {
+    "babel-core": "^6.2.1",
+    "babel-loader": "^6.2.0",
+    "babel-preset-es2015": "^6.1.18",
+    "babel-preset-react": "^6.1.18",
+    "babel-preset-stage-0": "^6.1.18",
+    "css-loader": "^0.23.1",
+    "extract-text-webpack-plugin": "^1.0.1",
+    "html-webpack-plugin": "^1.6.2",
+    "postcss-cssnext": "^2.5.2",
+    "postcss-loader": "^0.8.2",
+    "react": "^0.14.0",
+    "react-dom": "^0.14.2",
+    "react-hot-loader": "^1.3.0",
+    "style-loader": "^0.13.1",
+    "webpack": "^1.12.8",
+    "webpack-dev-server": "^1.12.1"
+  }
+}
