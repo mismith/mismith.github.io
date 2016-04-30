@@ -22,6 +22,16 @@
 			-webkit-column-count: 3;
 			-webkit-column-gap: 10px;
 		}
+		#repos.loading {
+			min-width: 100px;
+			min-height: 100px;
+			background: url(loading.svg) center center no-repeat;
+			background-size: 64px;
+			opacity: .75;
+		}
+		#repos.loading > * {
+			visibility: hidden;
+		}
 		@media (max-width: 1080px) {
 			#repos {
 				-webkit-column-count: 2;
@@ -57,7 +67,7 @@
 				<option value="name">Name</option>
 			</select>
 		</header>
-		<div id="repos">
+		<div id="repos" class="loading" :class="{loading: !repos.length}">
 			<article v-for="repo of repos | filterBy repoExcludes | filterBy filter in 'name' 'description' | orderBy order direction">
 				<h1>
 					<a :href="repo.$url">{{ repo.name }}</a>
