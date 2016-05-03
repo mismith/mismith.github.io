@@ -5,32 +5,33 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<title>mismith.github.io</title>
 	<style>
+		* {
+			box-sizing: border-box;
+		}
 		html,
 		body {
+			width: 100%;
+			height: 100%;
+			font-family: sans-serif;
+			padding: 0;
 			margin: 0;
 		}
-		body {
-			font-family: sans-serif;
+		#app {
+			display: flex;
+			flex-direction: column;
+			min-height: 100%;
 			padding: 10px;
 		}
 		#app > header {
 			display: flex;
 			justify-content: center;
 			padding: 10px;
+			margin-bottom: 10px;
 		}
+
 		#repos {
 			-webkit-column-count: 3;
 			-webkit-column-gap: 10px;
-		}
-		#repos.loading {
-			min-width: 100px;
-			min-height: 100px;
-			background: url(loading.svg) center center no-repeat;
-			background-size: 64px;
-			opacity: .75;
-		}
-		#repos.loading > * {
-			visibility: hidden;
 		}
 		@media (max-width: 1080px) {
 			#repos {
@@ -42,15 +43,44 @@
 				-webkit-column-count: 1;
 			}
 		}
+		#repos.loading {
+			flex-grow: 1;
+			width: 100%;
+			height: 100%;
+			background: url(loading.svg) center center no-repeat;
+			background-size: 64px;
+			opacity: .75;
+		}
+		#repos.loading > * {
+			visibility: hidden;
+		}
+
 		article {
-			background-color: #eee;
+			background-color: #f5f5f5;
 			-webkit-column-break-inside: avoid;
 			padding: 10px;
 			margin-bottom: 10px;
+			border: solid 1px #ddd;
+			border-radius: 3px;
 		}
-		article h1 {
+		article h2 {
 			margin-top: 0;
 		}
+		article footer {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			font-size: 12px;
+			opacity: .5;
+		}
+		article time {
+			display: flex;
+			align-items: center;
+		}
+		article time svg {
+			margin-right: 5px;
+		}
+
 		a {
 			color: #333;
 			text-decoration: none;
@@ -61,31 +91,51 @@
 	<main id="app">
 		<header>
 			<input type="search" v-model="filter" placeholder="Filter" autofocus />
-			<select v-model="sorting">
+			&nbsp;
+			<select v-model="sortBy">
 				<option value="pushed_at" selected>Recent</option>
 				<option value="created_at">Created</option>
 				<option value="name">Name</option>
 			</select>
 		</header>
 		<div id="repos" class="loading" :class="{loading: !repos.length}">
-			<article v-for="repo of repos | filterBy repoExcludes | filterBy filter in 'name' 'description' | orderBy order direction">
-				<h1>
-					<a :href="repo.$url">{{ repo.name }}</a>
-					<a v-if="repo.$url !== repo.html_url" :href="repo.html_url" title="Repo">
-						<svg aria-hidden="true" class="octicon octicon-repo" height="16" role="img" version="1.1" viewBox="0 0 12 16" width="12">
-							<path d="M4 9h-1v-1h1v1z m0-3h-1v1h1v-1z m0-2h-1v1h1v-1z m0-2h-1v1h1v-1z m8-1v12c0 0.55-0.45 1-1 1H6v2l-1.5-1.5-1.5 1.5V14H1c-0.55 0-1-0.45-1-1V1C0 0.45 0.45 0 1 0h10c0.55 0 1 0.45 1 1z m-1 10H1v2h2v-1h3v1h5V11z m0-10H2v9h9V1z"></path>
-						</svg>
-					</a>
-				</h1>
-				<div>{{ repo.description }}</div>
+			<article v-for="repo of repos | filterBy repoExcludes | filterBy filter in 'name' 'description' | orderBy sortOrder sortDirection">
+				<header>
+					<h2>
+						<a :href="repo.$url">{{ repo.name }}</a>
+						<a v-if="repo.$url !== repo.html_url" :href="repo.html_url" title="Repo">
+							<svg width="12" height="16">
+								<path d="M4 9h-1v-1h1v1z m0-3h-1v1h1v-1z m0-2h-1v1h1v-1z m0-2h-1v1h1v-1z m8-1v12c0 0.55-0.45 1-1 1H6v2l-1.5-1.5-1.5 1.5V14H1c-0.55 0-1-0.45-1-1V1C0 0.45 0.45 0 1 0h10c0.55 0 1 0.45 1 1z m-1 10H1v2h2v-1h3v1h5V11z m0-10H2v9h9V1z"></path>
+							</svg>
+						</a>
+					</h2>
+				</header>
+				<p>{{ repo.description }}</p>
+				<footer>
+					<time :timestamp="repo.pushed_at" :title="'Pushed: ' + repo.pushed_at">
+						<svg height="16" width="12" xmlns="http://www.w3.org/2000/svg">
+  <path d="M4 3h-1v-1h1v1z m-1 2h1v-1h-1v1z m4 0L4 9h2v7h2V9h2L7 5zM11 0H1C0.45 0 0 0.45 0 1v12c0 0.55 0.45 1 1 1h4v-1H1V11h4v-1H2V1h9.02l-0.02 9H9v1h2v2H9v1h2c0.55 0 1-0.45 1-1V1c0-0.55-0.45-1-1-1z" />
+</svg> {{ repo.pushed_at | moment 'from' }}</time>
+					<time :timestamp="repo.created_at" :title="'Created: ' + repo.created_at">
+						<svg height="16" width="14" xmlns="http://www.w3.org/2000/svg">
+  <path d="M12 2h-1v1.5c0 0.28-0.22 0.5-0.5 0.5H8.5c-0.28 0-0.5-0.22-0.5-0.5v-1.5H5v1.5c0 0.28-0.22 0.5-0.5 0.5H2.5c-0.28 0-0.5-0.22-0.5-0.5v-1.5H1c-0.55 0-1 0.45-1 1v11c0 0.55 0.45 1 1 1h11c0.55 0 1-0.45 1-1V3c0-0.55-0.45-1-1-1z m0 12H1V5h11v9zM4 3h-1V1h1v2z m6 0h-1V1h1v2zM5 7h-1v-1h1v1z m2 0h-1v-1h1v1z m2 0h-1v-1h1v1z m2 0h-1v-1h1v1zM3 9h-1v-1h1v1z m2 0h-1v-1h1v1z m2 0h-1v-1h1v1z m2 0h-1v-1h1v1z m2 0h-1v-1h1v1zM3 11h-1v-1h1v1z m2 0h-1v-1h1v1z m2 0h-1v-1h1v1z m2 0h-1v-1h1v1z m2 0h-1v-1h1v1zM3 13h-1v-1h1v1z m2 0h-1v-1h1v1z m2 0h-1v-1h1v1z m2 0h-1v-1h1v1z" />
+</svg> {{ repo.created_at | moment 'YYYY-MM-DD' }}</time>
+				</footer>
 			</article>
 		</div>
 	</main>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.25/browser.min.js"></script>
+
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.2.1/es6-promise.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/1.0.0/fetch.min.js"></script>
+
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.21/vue.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
+	<script src="https://cdn.rawgit.com/brockpetrie/vue-moment/v1.1/vue-moment.min.js"></script>
+
+	<script src="https://cdn.rawgit.com/marcuswestin/store.js/v1.3.20/store.min.js"></script>
+
 	<script type="text/javascript">
 		let excludes = [
 			'mismith.github.io',
@@ -96,17 +146,17 @@
 			el: '#app',
 			data: {
 				filter: '',
-				sorting: 'recent',
+				sortBy: 'recent',
 				repos: [],
 			},
 			computed: {
-				order: function() {
-					switch(this.sorting) {
-						default: return this.sorting;
+				sortOrder: function() {
+					switch(this.sortBy) {
+						default: return this.sortBy;
 					}
 				},
-				direction: function() {
-					switch(this.sorting) {
+				sortDirection: function() {
+					switch(this.sortBy) {
 						case 'created_at':
 						case 'pushed_at': return -1;
 						default: return 1;
@@ -121,13 +171,29 @@
 				},
 			},
 			created: function() {
+				if (store.enabled) {
+					this.repos = store.get('repos') || [];
+				}
 				fetch('https://api.github.com/users/mismith/repos?type=owner')
+					.then(res => {
+						if (200 <= res.status && res.status < 300) return res;
+						let err = new Error(res.statusText);
+						err.response = res;
+						throw err;
+					})
 					.then(res => res.json())
-					.then(repos => {
-						this.repos = repos.map(repo => {
-							repo.$url = repo.homepage || (repo.has_pages ? `https://${repo.owner.login}.github.io/${repo.name}/` : repo.html_url);
-							return repo;
-						});
+					.then(data => {
+						if (data) {
+							this.repos = data.map(repo => {
+								repo.$url = repo.homepage || (repo.has_pages ? `https://${repo.owner.login}.github.io/${repo.name}/` : repo.html_url);
+								return repo;
+							});
+							store.set('repos', this.repos);
+						}
+					})
+					.catch(err => {
+						// forward to github
+						location.href = 'https://github.com/mismith?tab=repositories';
 					});
 			},
 		});
