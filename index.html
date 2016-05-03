@@ -56,15 +56,29 @@
 		}
 
 		article {
-			background-color: #f5f5f5;
 			-webkit-column-break-inside: avoid;
-			padding: 10px;
 			margin-bottom: 10px;
-			border: solid 1px #ddd;
+			border: solid 1px #d8d8d8;
 			border-radius: 3px;
 		}
+		article.active {
+			border-color: #c9e6f2;
+		}
+		article.active header {
+			background-color: #f2f9fc;
+			border-color: #c9e6f2;
+		}
+		article > * {
+			padding: 10px;
+			margin: 0;
+		}
+		article header {
+			background-color: #f5f5f5;
+			border-bottom: solid 1px #d8d8d8;
+		}
 		article h2 {
-			margin-top: 0;
+			font-size: 1.2em;
+			margin: 0;
 		}
 		article footer {
 			display: flex;
@@ -90,7 +104,7 @@
 <body>
 	<main id="app">
 		<header>
-			<input type="search" v-model="filter" placeholder="Filter" autofocus />
+			<input type="search" v-model="filter" @keypress.enter="selectRepo" @keyup.up.prevent="prevRepo" @keyup.down.prevent="nextRepo" placeholder="Filter" autofocus />
 			&nbsp;
 			<select v-model="sortBy">
 				<option value="pushed_at" selected>Recent</option>
@@ -99,7 +113,7 @@
 			</select>
 		</header>
 		<div id="repos" class="loading" :class="{loading: !repos.length}">
-			<article v-for="repo of repos | filterBy repoExcludes | filterBy filter in 'name' 'description' | orderBy sortOrder sortDirection">
+			<article v-for="repo of orderedRepos" :class="{active: repo === selectedRepo}">
 				<header>
 					<h2>
 						<a :href="repo.$url">{{ repo.name }}</a>
@@ -148,29 +162,47 @@
 				filter: '',
 				sortBy: 'recent',
 				repos: [],
+				repoIndex: 0,
 			},
 			computed: {
-				sortOrder: function() {
-					switch(this.sortBy) {
-						default: return this.sortBy;
-					}
+				filteredRepos() {
+					let filterBy = Vue.filter('filterBy');
+
+					return filterBy(filterBy(this.repos, repo => {
+						if (repo.fork || ! repo.description || repo.description.indexOf('WIP') >= 0) return;
+						if (excludes.indexOf(repo.name) >= 0) return;
+						return true;
+					}), this.filter, 'name', 'description');
 				},
-				sortDirection: function() {
+				orderedRepos() {
+					let orderBy = Vue.filter('orderBy'),
+						direction = 1;
+
 					switch(this.sortBy) {
 						case 'created_at':
-						case 'pushed_at': return -1;
-						default: return 1;
+						case 'pushed_at': direction = -1;
 					}
+
+					return orderBy(this.filteredRepos, this.sortBy, direction);
+				},
+				selectedRepo() {
+					return 0 <= this.repoIndex && this.repoIndex < this.orderedRepos.length ? this.orderedRepos[this.repoIndex] : null;
 				},
 			},
 			methods: {
-				repoExcludes: function (repo) {
-					if (repo.fork || ! repo.description || repo.description.indexOf('WIP') >= 0) return;
-					if (excludes.indexOf(repo.name) >= 0) return;
-					return true;
+				prevRepo() {
+					this.repoIndex -= 1;
+					if (this.repoIndex < 0) this.repoIndex = this.orderedRepos.length - 1;
+				},
+				nextRepo() {
+					this.repoIndex += 1;
+					if (this.repoIndex > this.orderedRepos.length - 1) this.repoIndex = 0;
+				},
+				selectRepo() {
+					if (this.selectedRepo) location.href = this.selectedRepo.$url;
 				},
 			},
-			created: function() {
+			created() {
 				if (store.enabled) {
 					this.repos = store.get('repos') || [];
 				}
